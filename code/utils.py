@@ -200,23 +200,6 @@ from torch_geometric.utils import remove_self_loops
 import random
 
 def bipartite_negative_sampling(edge_index):
-    """
-    Generate negative edges for a bipartite graph.
-
-    Args:
-        edge_index (Tensor): The edge indices with shape [2, num_edges].
-        num_nodes_a (int): Number of nodes in Set A.
-        num_nodes_b (int): Number of nodes in Set B.
-        num_neg_samples (int, optional): Number of negative samples to generate.
-            If None, it defaults to the number of positive edges.
-        force_undirected (bool, optional): If set to True, the negative edges
-            will be made undirected. (Default: False)
-
-    Returns:
-        Tensor: Negative edge indices with shape [2, num_neg_samples].
-    """
-    # if num_neg_samples is None:
-    #     num_neg_samples = edge_index.size(1)
 
     # Remove self-loops, if any
     edge_index, _ = remove_self_loops(edge_index)
@@ -233,8 +216,6 @@ def bipartite_negative_sampling(edge_index):
     set_negativeInteractionKey = set()
 
     positive_edges = set((edge_index[0, i].item(), edge_index[1, i].item()) for i in range(edge_index.size(1)))
-
-    # print(positive_edges)
 
 
     negative_interaction_count = 0
@@ -263,8 +244,6 @@ def bipartite_negative_sampling(edge_index):
     # Create the tensor
     negative_list_ = torch.tensor(negative_list)
 
-    # print(result_tensor)
-
 
     
     return negative_list_
@@ -272,23 +251,14 @@ def bipartite_negative_sampling(edge_index):
 
 
 def do_edge_split(dataset, fast_split=False, val_ratio=0.05, test_ratio=0.1):
-    # data = dataset[0]
     data = dataset
     random.seed(234)
     torch.manual_seed(234)
 
-    # if not fast_split:
-    #     data = train_test_split_edges(data, val_ratio, test_ratio)
-    #     edge_index, _ = add_self_loops(data.train_pos_edge_index)
-    #     data.train_neg_edge_index = negative_sampling(
-    #         edge_index, num_nodes=data.num_nodes,
-    #         num_neg_samples=data.train_pos_edge_index.size(1))
-    # else:
+    
     num_nodes = data.num_nodes
     row, col = data.edge_index
-    # Return upper triangular portion.
-    # mask = row < col
-    # row, col = row[mask], col[mask]
+    
     n_v = int(math.floor(val_ratio * row.size(0)))
     n_t = int(math.floor(test_ratio * row.size(0)))
     # Positive edges.
@@ -466,16 +436,13 @@ def evaluate_auc(train_pred, train_true, val_pred, val_true, test_pred, test_tru
     valid_ap = average_precision_score(val_true, val_pred)
     test_ap = average_precision_score(test_true, test_pred)
     ###
-    # print(train_pred)
+    
     train_pred = (train_pred >= 0.5).to(torch.long)
-    # train_pred = train_pred.cpu().numpy()
+    
     val_pred = (val_pred >= 0.5).to(torch.long)
-    # val_pred = val_pred.cpu().numpy()
+    
     test_pred = (test_pred >= 0.5).to(torch.long)
-    # test_pred = test_pred.cpu().numpy()
-
-    # print(type(train_pred))  # Should be <class 'numpy.ndarray'>
-    # print(type(train_true))  # Should be <class 'numpy.ndarray'>
+    
 
     train_pred = train_pred.detach().cpu().numpy()
     train_true = train_true.detach().cpu().numpy()
@@ -486,8 +453,7 @@ def evaluate_auc(train_pred, train_true, val_pred, val_true, test_pred, test_tru
     test_pred = test_pred.detach().cpu().numpy()
     test_true = test_true.detach().cpu().numpy()
 
-    # print(type(train_pred))  # Should be <class 'numpy.ndarray'>
-    # print(type(train_true))  # Should be <class 'numpy.ndarray'>
+    
 
 
     train_prec = precision_score(train_true, train_pred)
@@ -510,25 +476,6 @@ def evaluate_auc(train_pred, train_true, val_pred, val_true, test_pred, test_tru
     valid_mcc = matthews_corrcoef(val_true, val_pred)
     test_mcc = matthews_corrcoef(test_true, test_pred)
 
-
-    # tn_train, fp_train, fn_train, tp_train = confusion_matrix(train_true, train_pred.round()).ravel()
-    # tn_valid, fp_valid, fn_valid, tp_valid = confusion_matrix(val_true, val_pred.round()).ravel()
-    # tn_test, fp_test, fn_test, tp_test = confusion_matrix(test_true, test_pred.round()).ravel()
-
-    # if (tn_train + fp_train + fn_train + tp_train) != 0:
-    #   train_acc =  tp_train + tn_train / tn_train + fp_train + fn_train + tp_train
-    # else:
-    #   train_acc = 0
-
-    # if (tn_valid + fp_valid + fn_valid + tp_valid) != 0:
-    #   valid_acc =  tp_valid + tn_valid / tn_valid + fp_valid + fn_valid + tp_valid
-    # else:
-    #   valid_acc = 0
-
-    # if (tn_test + fp_test + fn_test + tp_test) != 0:
-    #   test_acc =  tp_test + tn_test / tn_test + fp_test + fn_test + tp_test
-    # else:
-    #   test_acc = 0
 
 
     results = dict()

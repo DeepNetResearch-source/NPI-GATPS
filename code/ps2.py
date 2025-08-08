@@ -6,7 +6,6 @@ from torch_sparse import SparseTensor
 from model import AutoLink_l3, SearchGraph_l31
 import os.path as osp
 from torch.autograd import Variable
-from torch_geometric.datasets import Planetoid
 from logger import Logger
 from utils import do_edge_split, evaluate_auc, IndexLoader
 from torch_geometric.utils import to_undirected, add_self_loops, negative_sampling
@@ -86,23 +85,6 @@ from torch_geometric.utils import remove_self_loops
 import random
 
 def bipartite_negative_sampling(edge_index):
-    """
-    Generate negative edges for a bipartite graph.
-
-    Args:
-        edge_index (Tensor): The edge indices with shape [2, num_edges].
-        num_nodes_a (int): Number of nodes in Set A.
-        num_nodes_b (int): Number of nodes in Set B.
-        num_neg_samples (int, optional): Number of negative samples to generate.
-            If None, it defaults to the number of positive edges.
-        force_undirected (bool, optional): If set to True, the negative edges
-            will be made undirected. (Default: False)
-
-    Returns:
-        Tensor: Negative edge indices with shape [2, num_neg_samples].
-    """
-    # if num_neg_samples is None:
-    #     num_neg_samples = edge_index.size(1)
 
     # Remove self-loops, if any
     edge_index, _ = remove_self_loops(edge_index)
@@ -119,8 +101,6 @@ def bipartite_negative_sampling(edge_index):
     set_negativeInteractionKey = set()
 
     positive_edges = set((edge_index[0, i].item(), edge_index[1, i].item()) for i in range(edge_index.size(1)))
-
-    # print(positive_edges)
 
 
     negative_interaction_count = 0
@@ -149,10 +129,7 @@ def bipartite_negative_sampling(edge_index):
     # Create the tensor
     negative_list_ = torch.tensor(negative_list)
 
-    # print(result_tensor)
 
-
-    
     return negative_list_
 
 
@@ -622,11 +599,11 @@ def main(data, args, device):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Planetoid (GNN)')
+    parser = argparse.ArgumentParser(description='(GNN)')
     parser.add_argument('--device', type=int, default=0)
-    parser.add_argument('--use_sage', type=str, default='GAT')
-    parser.add_argument('--test_sage', type=str, default='GAT')
-    parser.add_argument('--dataset', type=str, default='Cora')
+    parser.add_argument('--use_sage', type=str, default='GATV2')
+    parser.add_argument('--test_sage', type=str, default='GATV2')
+    parser.add_argument('--dataset', type=str, default='NPInter2')
     parser.add_argument('--use_node_embedding', action='store_true')
     parser.add_argument('--use_valedges_as_input', action='store_true', default=True)
     parser.add_argument('--num_layers', type=int, default=3)
@@ -657,19 +634,17 @@ if __name__ == "__main__":
     device = torch.device(device)
 
     path = osp.join('dataset', args.dataset)
-    # dataset = Planetoid(path, args.dataset)
     dataset = torch.load("./data.pt")
     split_edge = do_edge_split(dataset)
-    # data = dataset[0]
     data = dataset
     data.edge_index = split_edge['train']['edge'].t()
     if args.use_valedges_as_input:
         val_edge_index = split_edge['valid']['edge'].t()
         val_edge_index = to_undirected(val_edge_index)
         edge_index = torch.cat([data.edge_index, val_edge_index], dim=-1)
-        data.edge_index = SparseTensor.from_edge_index(edge_index, sparse_sizes=[2878,2878]).t()
+        data.edge_index = SparseTensor.from_edge_index(edge_index, sparse_sizes=[dataset.x.shape[0],dataset.x.shape[0]]).t()
     else:
-        data.edge_index = SparseTensor.from_edge_index(data.edge_index, sparse_sizes=[2878,2878]).t()
+        data.edge_index = SparseTensor.from_edge_index(data.edge_index, sparse_sizes=[dataset.x.shape[0],dataset.x.shape[0]]).t()
 
     data = data.to(device)
     main(data, args, device)

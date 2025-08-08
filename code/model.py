@@ -384,12 +384,6 @@ class AutoLink_l3(torch.nn.Module):
                     self.convs.append(GATv2Conv(in_channels, hidden_channels, heads=3, concat=False))
                 else:
                     self.convs.append(GATv2Conv(hidden_channels, hidden_channels, heads=3, concat=False))
-        elif self.gnn_type == 'GAE':
-            for i in range(num_layers):
-                if i == 0:
-                    self.convs.append(GAE(in_channels, hidden_channels))
-                else:
-                    self.convs.append(GAE(hidden_channels, hidden_channels))
         elif self.gnn_type == 'GAT':
             for i in range(num_layers):
                 if i == 0:
@@ -409,7 +403,7 @@ class AutoLink_l3(torch.nn.Module):
                 else:
                     self.convs.append(GCNConv(hidden_channels, hidden_channels, cached=True))
         else:
-            raise SystemExit('The gnn type should be GCN or SAGE')
+            raise SystemExit('The gnn type should be GCN or SAGE or ...')
 
         self._init_predictor()
         self.dropout = dropout
