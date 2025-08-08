@@ -34,11 +34,11 @@ We use five publicly available datasets:
 ## To preprocess the data:
 
 ```
-!python ./code/data_preprocessing/src/generate_edgelist.py --projectName yourProjectName --interactionDatasetName NPInter2 --createBalanceDataset 0
+python ./code/data_preprocessing/src/generate_edgelist.py --projectName yourProjectName --interactionDatasetName NPInter2 --createBalanceDataset 0
 
-!python ./code/data_preprocessing/node2vec-master/src/main.py --input './code/data_preprocessing/data/graph/yourProjectName/bipartite_graph.edgelist' --output './code/data_preprocessing/data/node2vec_result/yourProjectName/training_0/result.emb'
+python ./code/data_preprocessing/node2vec-master/src/main.py --input './code/data_preprocessing/data/graph/yourProjectName/bipartite_graph.edgelist' --output './code/data_preprocessing/data/node2vec_result/yourProjectName/training_0/result.emb'
 
-!python ./code/data_preprocessing/src/generate_dataset.py --projectName yourProjectName --interactionDatasetName NPInter2 --fold 0 --noKmer 0 --createBalanceDataset 0
+python ./code/data_preprocessing/src/generate_dataset.py --projectName yourProjectName --interactionDatasetName NPInter2 --fold 0 --noKmer 0 --createBalanceDataset 0
 
 ```
 
@@ -48,6 +48,6 @@ We use five publicly available datasets:
 To train the model:
 
 ```
-!python ./code/ps2.py --dataset "NPInter2"
+python ./code/ps2.py --dataset "NPInter2"
 
 ```
